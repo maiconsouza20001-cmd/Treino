@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Fields: uid, email, displayName, photoURL, role, xp, level, streak, lastWorkoutDate, weight, height, age, goal, level_fitness
+    //
+    // Collection: exercises
+    // Fields: id, name, muscleGroup, equipment, difficulty, videoUrl, instructions, commonErrors
+    //
+    // Collection: workouts
+    // Fields: userId, division, createdAt, days
+    //
+    // Collection: workout_sessions
+    // Fields: userId, workoutId, day, completedAt, xpEarned
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'personal' ||
+        (request.auth.token.email == "maiconsantos13022000@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    // User Rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && request.resource.data.role in ['aluno', 'personal'];
+      allow update: if isOwner(userId) || isAdmin();
+    }
+
+    // Exercise Rules
+    match /exercises/{exerciseId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Workout Rules
+    match /workouts/{workoutId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || isAdmin());
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+    }
+
+    // Workout Session Rules
+    match /workout_sessions/{sessionId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || isAdmin());
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+    }
+  }
+}

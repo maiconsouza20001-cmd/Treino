@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and gamification data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["aluno", "personal"] },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "streak": { "type": "number" },
+        "lastWorkoutDate": { "type": "string" },
+        "weight": { "type": "number" },
+        "height": { "type": "number" },
+        "age": { "type": "number" },
+        "goal": { "type": "string" },
+        "level_fitness": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Exercise": {
+      "title": "Exercise",
+      "description": "Exercise library item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "muscleGroup": { "type": "string" },
+        "equipment": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "instructions": { "type": "string" },
+        "commonErrors": { "type": "string" }
+      },
+      "required": ["name", "muscleGroup"]
+    },
+    "Workout": {
+      "title": "Workout",
+      "description": "Generated workout plan",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "division": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "days": { "type": "array" }
+      },
+      "required": ["userId", "division"]
+    },
+    "WorkoutSession": {
+      "title": "WorkoutSession",
+      "description": "History of a completed workout",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "workoutId": { "type": "string" },
+        "day": { "type": "string" },
+        "completedAt": { "type": "string" },
+        "xpEarned": { "type": "number" }
+      },
+      "required": ["userId", "completedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/exercises/{exerciseId}": {
+      "schema": "Exercise",
+      "description": "Exercise library"
+    },
+    "/workouts/{workoutId}": {
+      "schema": "Workout",
+      "description": "User workout plans"
+    },
+    "/workout_sessions/{sessionId}": {
+      "schema": "WorkoutSession",
+      "description": "Workout history"
+    }
+  }
+}
